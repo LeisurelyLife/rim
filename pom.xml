@@ -23,6 +23,7 @@
 
     <properties>
         <java.version>1.8</java.version>
+        <tk.mybatis.version>4.0.3</tk.mybatis.version>
     </properties>
 
     <dependencies>

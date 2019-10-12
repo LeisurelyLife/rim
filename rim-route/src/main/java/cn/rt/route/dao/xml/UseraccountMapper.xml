@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.rt.dao.UseraccountMapper">
+  <resultMap id="BaseResultMap" type="cn.rt.common.entity.Useraccount">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="UserAccount" jdbcType="VARCHAR" property="useraccount" />
+    <result column="UserId" jdbcType="VARCHAR" property="userid" />
+    <result column="Password" jdbcType="VARCHAR" property="password" />
+  </resultMap>
+</mapper>

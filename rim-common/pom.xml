@@ -11,5 +11,15 @@
 
     <artifactId>rim-common</artifactId>
 
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <!--通用Mapper -->
+        <dependency>
+            <groupId>tk.mybatis</groupId>
+            <artifactId>mapper</artifactId>
+            <version>${tk.mybatis.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>
