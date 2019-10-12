@@ -3,6 +3,7 @@ package cn.rt.route.controller;
 import cn.rt.common.common.BaseResponse;
 import cn.rt.common.common.Constants;
 import cn.rt.common.entity.Useraccount;
+import cn.rt.common.util.InterUtil;
 import cn.rt.common.util.StringUtils;
 import cn.rt.common.util.UuidUtils;
 import cn.rt.route.service.UserService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -26,6 +28,9 @@ import java.util.Map;
 public class RouteController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RouteController.class);
+
+    @Autowired
+    private HttpServletRequest request;
 
     @Autowired
     private UserService userService;
@@ -42,6 +47,7 @@ public class RouteController {
             useraccount = userService.selectOne(useraccount);
             if (useraccount != null) {
                 response.setState(Constants.RESP_FAIL);
+                response.setMsg(InterUtil.interInfo(request, "user.error.exist"));
                 return response;
             }
             useraccount = new Useraccount();
@@ -52,9 +58,11 @@ public class RouteController {
         } catch (Exception e) {
             LOGGER.error("新增用户失败", e);
             response.setState(Constants.RESP_FAIL);
+            response.setMsg(InterUtil.interInfo(request, "common.operFail"));
             return response;
         }
         response.setState(Constants.RESP_SUCCESS);
+        response.setMsg(InterUtil.interInfo(request, "common.operSucc"));
         return response;
     }
 
