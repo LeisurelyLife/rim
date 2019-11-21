@@ -2,8 +2,6 @@ package cn.rt.common.common;
 
 import org.springframework.context.ApplicationContext;
 
-import java.util.Map;
-
 /**
  * About: application工具类
  * Other:
@@ -44,8 +42,7 @@ public class SpringContextHolder {
     @SuppressWarnings("unchecked")
     public static <T> T getBean(Class<T> clazz) {
         checkApplicationContext();
-        Map<String, T> beansOfType = applicationContext.getBeansOfType(clazz);
-        return beansOfType.get(beansOfType.keySet().iterator().next());
+        return applicationContext.getBean(clazz);
     }
 
     /**

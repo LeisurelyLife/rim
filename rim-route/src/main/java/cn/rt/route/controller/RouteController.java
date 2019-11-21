@@ -66,4 +66,39 @@ public class RouteController {
         return response;
     }
 
+    @RequestMapping(value = "login", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResponse login(@RequestBody Map<String, Object> paramMap) {
+        BaseResponse response = new BaseResponse();
+        try {
+            String account = StringUtils.getObjStr(paramMap.get("userAccount"));
+            String password = StringUtils.getObjStr(paramMap.get("password"));
+            Useraccount useraccount = new Useraccount();
+            useraccount.setUseraccount(account);
+            useraccount = userService.selectOne(useraccount);
+            if (useraccount == null) {
+                response.setState(Constants.RESP_FAIL);
+                response.setMsg(InterUtil.interInfo(request, "user.error.notexist"));
+                return response;
+            }
+
+            BaseResponse isLogin = userService.isLogin(useraccount);
+            if (Constants.RESP_SUCCESS.equals(isLogin.getState())) {
+                String serverAddr = StringUtils.getObjStr(isLogin.getData());
+            }
+
+            userService.login(useraccount);
+
+
+        } catch (Exception e) {
+            LOGGER.error("新增用户失败", e);
+            response.setState(Constants.RESP_FAIL);
+            response.setMsg(InterUtil.interInfo(request, "common.operFail"));
+            return response;
+        }
+        response.setState(Constants.RESP_SUCCESS);
+        response.setMsg(InterUtil.interInfo(request, "common.operSucc"));
+        return response;
+    }
+
 }

@@ -1,8 +1,10 @@
 package cn.rt.server.netty;
 
+import cn.rt.server.util.SessionSocketHolder;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.socket.nio.NioSocketChannel;
 
 /**
  * @author ruanting
@@ -17,4 +19,18 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
         channel.writeAndFlush("[" + channel.remoteAddress() + "]" + s + "\n");
     }
 
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("接入" + ctx.channel().remoteAddress());
+        super.channelActive(ctx);
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("失联" + ctx.channel().remoteAddress());
+        Channel channel = ctx.channel();
+        SessionSocketHolder.moveChannel((NioSocketChannel) channel);
+
+        super.channelInactive(ctx);
+    }
 }

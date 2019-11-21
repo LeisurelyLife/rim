@@ -11,4 +11,10 @@ public interface UserService extends BaseService<Useraccount> {
 
     BaseResponse register(Useraccount useraccount);
 
+    BaseResponse isLogin(Useraccount useraccount);
+
+    BaseResponse login(Useraccount useraccount);
+
+    String getRedisKey();
+
 }

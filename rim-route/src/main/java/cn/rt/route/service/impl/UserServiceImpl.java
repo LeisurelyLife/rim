@@ -9,6 +9,7 @@ import cn.rt.route.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,6 +22,9 @@ public class UserServiceImpl extends BaseServiceImpl<Useraccount> implements Use
     private static final Logger LOGGER = LoggerFactory.getLogger(RouteController.class);
 
     @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+
+    @Autowired
     private UseraccountMapper useraccountMapper;
 
     @Override
@@ -29,5 +33,24 @@ public class UserServiceImpl extends BaseServiceImpl<Useraccount> implements Use
         BaseResponse response = new BaseResponse();
         response.setState(Constants.RESP_SUCCESS);
         return response;
+    }
+
+    @Override
+    public BaseResponse isLogin(Useraccount useraccount) {
+        String result = redisTemplate.opsForValue().get("");
+
+        return null;
+    }
+
+    @Override
+    public BaseResponse login(Useraccount useraccount) {
+        //获取
+        //
+        return null;
+    }
+
+    @Override
+    public String getRedisKey() {
+        return null;
     }
 }
