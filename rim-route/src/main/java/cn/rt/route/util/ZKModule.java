@@ -1,18 +1,17 @@
 package cn.rt.route.util;
 
 import cn.hutool.core.util.RandomUtil;
+import cn.rt.common.common.Constants;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author ruanting
@@ -31,9 +30,15 @@ public class ZKModule {
     @Autowired
     private ZkClient zkClient;
 
-    public static String getRandomServer() {
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+
+    public String getRandomServer() {
         String[] servers = serverCash.values().toArray(new String[0]);
-        int i = RandomUtil.randomInt(servers.length - 1);
+        if (servers.length < 1) {
+            return null;
+        }
+        int i = RandomUtil.randomInt(servers.length);
         return servers[i];
     }
 
@@ -51,6 +56,7 @@ public class ZKModule {
 
     public void updateCache(List<String> serverList) {
         Collection<String> values = serverCash.values();
+        log.info("当前服务器列表为" + values);
         values.removeAll(serverList);
         ArrayList<String> clearServer = new ArrayList<>();
         clearServer.addAll(values);
@@ -58,6 +64,12 @@ public class ZKModule {
         serverCash.clear();
         for (String server : serverList) {
             serverCash.put(server, server);
+        }
+        log.info("更新后服务器列表为" + serverCash.values());
+
+        //因为route是水平扩展的，所以这个后期应该抽离出来单独做个服务来处理server宕机清除对应下线
+        for (String serverAddr : clearServer) {
+            clearServerRedis(serverAddr);
         }
     }
 
@@ -68,6 +80,12 @@ public class ZKModule {
             serverCash.put(child, child);
         }
         log.info("初始化server" + serverCash.values());
+    }
+
+    public void clearServerRedis(String serverAddr) {
+        String pattern = Constants.REDIS_LOGIN_PREFIX + "|*|" + serverAddr + "*";
+        Set<String> keys = redisTemplate.keys(pattern);
+        redisTemplate.delete(keys);
     }
 
 }

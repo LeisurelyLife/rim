@@ -44,7 +44,7 @@ public class ZKRegister {
         //创建父节点
         this.createRootNode();
 
-        String path = zkRoot + "/" + ip + ":" + cimServerPort + ":" + httpPort;
+        String path = zkRoot + "/" + ip + ":" + httpPort + ":" + cimServerPort;
         this.createNode(path);
         log.info("注册 zookeeper 成功，msg=[{}]", path);
     }

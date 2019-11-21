@@ -10,4 +10,7 @@ public class Constants {
     public static final String RESP_SUCCESS = "success";
     public static final String RESP_FAIL = "fail";
 
+    //redis存储登陆信息前缀
+    public static final String REDIS_LOGIN_PREFIX = "rim-login";
+
 }

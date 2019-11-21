@@ -22,12 +22,19 @@ public class SessionSocketHolder {
         return channel;
     }
 
-    public static void moveChannel(NioSocketChannel channel) {
+    public static String moveChannel(NioSocketChannel channel) {
+        String userId = "";
         for (Map.Entry<String, NioSocketChannel> entry : SESSION_MAP.entrySet()) {
             if (entry.getValue() == channel) {
+                userId = entry.getKey();
                 SESSION_MAP.remove(entry.getKey());
             }
         }
+        return userId;
+    }
+
+    public static boolean exist(NioSocketChannel channel) {
+        return SESSION_MAP.values().contains(channel);
     }
 
 }

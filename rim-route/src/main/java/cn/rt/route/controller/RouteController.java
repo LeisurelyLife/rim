@@ -82,23 +82,33 @@ public class RouteController {
                 return response;
             }
 
+            if (!useraccount.getPassword().equals(password)) {
+                response.setState(Constants.RESP_FAIL);
+                response.setMsg(InterUtil.interInfo(request, "user.error.password"));
+                return response;
+            }
+
             BaseResponse isLogin = userService.isLogin(useraccount);
             if (Constants.RESP_SUCCESS.equals(isLogin.getState())) {
                 String serverAddr = StringUtils.getObjStr(isLogin.getData());
+                response.setState(Constants.RESP_SUCCESS);
+                response.setData(serverAddr);
+                return response;
             }
 
-            userService.login(useraccount);
-
-
+            BaseResponse login = userService.login(useraccount);
+            if (Constants.RESP_SUCCESS.equals(login.getState())) {
+                response.setState(Constants.RESP_SUCCESS);
+                response.setData(login.getData());
+                return response;
+            }
+            return response;
         } catch (Exception e) {
             LOGGER.error("新增用户失败", e);
             response.setState(Constants.RESP_FAIL);
             response.setMsg(InterUtil.interInfo(request, "common.operFail"));
             return response;
         }
-        response.setState(Constants.RESP_SUCCESS);
-        response.setMsg(InterUtil.interInfo(request, "common.operSucc"));
-        return response;
     }
 
 }
