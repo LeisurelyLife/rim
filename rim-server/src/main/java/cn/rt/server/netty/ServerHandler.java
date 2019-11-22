@@ -27,35 +27,41 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
-        Channel channel = ctx.channel();
-        JSONObject object = new JSONObject(msg);
-        boolean exist = SessionSocketHolder.exist((NioSocketChannel) channel);
-        if (!exist) {
-            String pattern = Constants.REDIS_LOGIN_PREFIX + "|" + object.getStr("userId") + "*";
-            RedisTemplate<String, String> redisTemplate = SpringBeanFactory.getBean(StringRedisTemplate.class);
-            Set<String> keys = redisTemplate.keys(pattern);
-            if (keys.size() < 1) {
-                //报文待定
-                channel.writeAndFlush("fail");
-                return;
+        log.info(msg);
+        try {
+            Channel channel = ctx.channel();
+            log.info("channel class name " + channel.getClass().getName());
+            JSONObject object = new JSONObject(msg);
+            boolean exist = SessionSocketHolder.exist((NioSocketChannel) channel);
+            if (!exist) {
+                String pattern = Constants.REDIS_LOGIN_PREFIX + "|" + object.getStr("userId") + "*";
+                RedisTemplate<String, String> redisTemplate = SpringBeanFactory.getBean("stringRedisTemplate", StringRedisTemplate.class);
+                Set<String> keys = redisTemplate.keys(pattern);
+                if (keys.size() < 1) {
+                    //报文待定
+                    channel.writeAndFlush("fail");
+                    return;
+                }
+                String key = keys.toArray(new String[0])[0];
+                String value = redisTemplate.opsForValue().get(key);
+                String setAddr = key.split("\\|")[2].split(":")[0];
+                String localAddr = InetAddress.getLocalHost().getHostAddress();
+                //登陆设定的服务器与当前服务器不同不允许
+                if (!localAddr.equals(setAddr)) {
+                    //报文待定
+                    channel.writeAndFlush("fail");
+                    return;
+                }
+                SessionSocketHolder.setUserChannel(object.getStr("userId"), (NioSocketChannel) channel);
+                // 重设防止过期
+                redisTemplate.opsForValue().set(key, value);
             }
-            String key = keys.toArray(new String[0])[0];
-            String value = redisTemplate.opsForValue().get(key);
-            String setAddr = key.split("|")[2].split(":")[0];
-            String localAddr = InetAddress.getLocalHost().getHostAddress();
-            //登陆设定的服务器与当前服务器不同不允许
-            if (!localAddr.equals(setAddr)) {
-                //报文待定
-                channel.writeAndFlush("fail");
-                return;
-            }
-            SessionSocketHolder.setUserChannel(object.getStr("userId"), (NioSocketChannel) channel);
-            // 重设防止过期
-            redisTemplate.opsForValue().set(key, value);
+            log.info("用户ID" + object.getStr("userId") + "登陆成功");
+            String result = "{}";
+            channel.writeAndFlush(result);
+        } catch (Exception e) {
+            log.error("用户注册失败", e);
         }
-        log.info("用户ID" + object.getStr("userId") + "登陆成功");
-        String result = "{}";
-        channel.writeAndFlush(result);
     }
 
     @Override
@@ -68,7 +74,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
         String userId = SessionSocketHolder.moveChannel((NioSocketChannel) channel);
-        RedisTemplate<String, String> redisTemplate = SpringBeanFactory.getBean(StringRedisTemplate.class);
+        RedisTemplate<String, String> redisTemplate = SpringBeanFactory.getBean("stringRedisTemplate", StringRedisTemplate.class);
         String pattern = Constants.REDIS_LOGIN_PREFIX + "|" + userId + "*";
         Set<String> keys = redisTemplate.keys(pattern);
         if (keys.size() < 1) {
@@ -76,6 +82,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
         }
         String key = keys.toArray(new String[0])[0];
         redisTemplate.expire(key, 60, TimeUnit.SECONDS);
+        log.info("用户ID " + userId + " 掉线");
         super.channelInactive(ctx);
     }
 }

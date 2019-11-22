@@ -1,11 +1,13 @@
 package cn.rt.route.service.impl;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONObject;
 import cn.rt.common.common.BaseResponse;
 import cn.rt.common.common.Constants;
 import cn.rt.common.entity.Useraccount;
 import cn.rt.common.util.StringUtils;
 import cn.rt.route.controller.RouteController;
+import cn.rt.route.dao.UserFriendMapper;
 import cn.rt.route.dao.UseraccountMapper;
 import cn.rt.route.service.UserService;
 import cn.rt.route.util.ZKModule;
@@ -15,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class UserServiceImpl extends BaseServiceImpl<Useraccount> implements UserService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RouteController.class);
+    private static final Logger log = LoggerFactory.getLogger(RouteController.class);
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
@@ -35,6 +37,9 @@ public class UserServiceImpl extends BaseServiceImpl<Useraccount> implements Use
 
     @Autowired
     private UseraccountMapper useraccountMapper;
+
+    @Autowired
+    private UserFriendMapper userFriendMapper;
 
     @Override
     public BaseResponse register(Useraccount useraccount) {
@@ -55,8 +60,15 @@ public class UserServiceImpl extends BaseServiceImpl<Useraccount> implements Use
         }
         baseResponse.setState(Constants.RESP_SUCCESS);
         String key = keys.toArray(new String[0])[0];
-        String[] split = key.split("|")[2].split(":");
-        baseResponse.setData(split[0] + ":" + split[2]);
+        String value = redisTemplate.opsForValue().get(key);
+        String[] kSplit = key.split("\\|")[2].split(":");
+        String[] vSplit = value.split("\\|");
+        JSONObject data = new JSONObject();
+        data.put("socketServer", kSplit[0]);
+        data.put("socketPort", kSplit[2]);
+        data.put("userId", useraccount.getUserid());
+        data.put("token", vSplit[0]);
+        baseResponse.setData(data);
         return baseResponse;
     }
 
@@ -70,11 +82,15 @@ public class UserServiceImpl extends BaseServiceImpl<Useraccount> implements Use
         }
         String[] split = randomServer.split(":");
         String redisKey = Constants.REDIS_LOGIN_PREFIX + "|" + useraccount.getUserid() + "|" + split[0] + ":" + split[1] + ":" + split[2];
-        redisTemplate.opsForValue().set(redisKey, useraccount.getUseraccount(), 60, TimeUnit.SECONDS);
+        String token = IdUtil.simpleUUID();
+        String redisV = token;
+        redisTemplate.opsForValue().set(redisKey, redisV, 60, TimeUnit.SECONDS);
         baseResponse.setState(Constants.RESP_SUCCESS);
         JSONObject data = new JSONObject();
         data.put("socketServer", split[0]);
         data.put("socketPort", split[2]);
+        data.put("userId", useraccount.getUserid());
+        data.put("token", token);
         baseResponse.setData(data);
         return baseResponse;
     }
@@ -82,5 +98,24 @@ public class UserServiceImpl extends BaseServiceImpl<Useraccount> implements Use
     @Override
     public String getRedisKey() {
         return null;
+    }
+
+    @Override
+    public List<Map<String, Object>> getFriend(String userId) {
+        List<String> friendIds = userFriendMapper.getFriendId(userId);
+        ArrayList<Map<String, Object>> result = new ArrayList<>();
+        for (String friendId : friendIds) {
+            HashMap<String, Object> friend = new HashMap<>();
+            friend.put("userId", friendId);
+            String pattern = Constants.REDIS_LOGIN_PREFIX + "|" + friendId + "*";
+            Set<String> keys = redisTemplate.keys(pattern);
+            if (keys.size() < 1) {
+                friend.put("state", Constants.User.USER_LOGIN_STATE_OFF.getValue());
+            } else {
+                friend.put("state", Constants.User.USER_LOGIN_STATE_ON.getValue());
+            }
+            result.add(friend);
+        }
+        return result;
     }
 }
