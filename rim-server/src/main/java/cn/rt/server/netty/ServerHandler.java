@@ -2,6 +2,7 @@ package cn.rt.server.netty;
 
 import cn.hutool.json.JSONObject;
 import cn.rt.common.common.Constants;
+import cn.rt.common.util.IPUtil;
 import cn.rt.server.util.SessionSocketHolder;
 import cn.rt.server.util.SpringBeanFactory;
 import io.netty.channel.Channel;
@@ -13,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.net.InetAddress;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -30,7 +30,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
         log.info(msg);
         try {
             Channel channel = ctx.channel();
-            log.info("channel class name " + channel.getClass().getName());
             JSONObject object = new JSONObject(msg);
             boolean exist = SessionSocketHolder.exist((NioSocketChannel) channel);
             if (!exist) {
@@ -45,7 +44,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
                 String key = keys.toArray(new String[0])[0];
                 String value = redisTemplate.opsForValue().get(key);
                 String setAddr = key.split("\\|")[2].split(":")[0];
-                String localAddr = InetAddress.getLocalHost().getHostAddress();
+                String localAddr = IPUtil.getInternetIp();
                 //登陆设定的服务器与当前服务器不同不允许
                 if (!localAddr.equals(setAddr)) {
                     //报文待定
@@ -57,8 +56,11 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
                 redisTemplate.opsForValue().set(key, value);
             }
             log.info("用户ID" + object.getStr("userId") + "登陆成功");
-            String result = "{}";
-            channel.writeAndFlush(result);
+//            String result = "{}";
+            JSONObject result = new JSONObject();
+            result.put("code", Constants.ServerConntCode.SUCCESS.getCode());
+            result.put("msg", "连接成功");
+            channel.writeAndFlush(result.toString());
         } catch (Exception e) {
             log.error("用户注册失败", e);
         }

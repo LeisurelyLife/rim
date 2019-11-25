@@ -37,4 +37,19 @@ public class Constants {
         }
     }
 
+    public enum ServerConntCode {
+        //成功
+        SUCCESS("00");
+
+        private String code;
+
+        ServerConntCode(String code) {
+            this.code = code;
+        }
+
+        public String getCode() {
+            return code;
+        }
+    }
+
 }
