@@ -17,6 +17,11 @@ public class BaseResponse {
     private String msg;
 
     /**
+     * 状态码
+     */
+    private String code;
+
+    /**
      * 返回数据域
      */
     private Object data;
@@ -43,5 +48,13 @@ public class BaseResponse {
 
     public void setData(Object data) {
         this.data = data;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 }

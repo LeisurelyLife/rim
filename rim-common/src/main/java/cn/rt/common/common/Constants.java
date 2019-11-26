@@ -10,6 +10,11 @@ public class Constants {
     public static final String RESP_SUCCESS = "success";
     public static final String RESP_FAIL = "fail";
 
+    //与客户端交互状态码
+    public static final String CODE_SUCCESS = "00";
+    public static final String CODE_FAIL = "01";
+
+
     //redis存储登陆信息前缀
     public static final String REDIS_LOGIN_PREFIX = "rim-login";
 
@@ -37,6 +42,9 @@ public class Constants {
         }
     }
 
+    /**
+     * server连接返回码
+     */
     public enum ServerConntCode {
         //成功
         SUCCESS("00");
