@@ -1,34 +1,25 @@
 package cn.rt.common.entity;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Table(name = "useraccount")
 public class Useraccount {
-    @Column(name = "UserAccount")
-    private String useraccount;
-
-    @Column(name = "UserId")
+    @Id
+    @Column(name = "userId")
     private String userid;
 
-    @Column(name = "Password")
+    @Column(name = "userAccount")
+    private String useraccount;
+
     private String password;
 
-    /**
-     * @return UserAccount
-     */
-    public String getUseraccount() {
-        return useraccount;
-    }
+    @Column(name = "userName")
+    private String username;
 
     /**
-     * @param useraccount
-     */
-    public void setUseraccount(String useraccount) {
-        this.useraccount = useraccount;
-    }
-
-    /**
-     * @return UserId
+     * @return userId
      */
     public String getUserid() {
         return userid;
@@ -42,7 +33,21 @@ public class Useraccount {
     }
 
     /**
-     * @return Password
+     * @return userAccount
+     */
+    public String getUseraccount() {
+        return useraccount;
+    }
+
+    /**
+     * @param useraccount
+     */
+    public void setUseraccount(String useraccount) {
+        this.useraccount = useraccount;
+    }
+
+    /**
+     * @return password
      */
     public String getPassword() {
         return password;
@@ -53,5 +58,19 @@ public class Useraccount {
      */
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    /**
+     * @return userName
+     */
+    public String getUsername() {
+        return username;
+    }
+
+    /**
+     * @param username
+     */
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

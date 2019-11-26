@@ -5,8 +5,9 @@
     <!--
       WARNING - @mbg.generated
     -->
-    <result column="UserAccount" jdbcType="VARCHAR" property="useraccount" />
-    <result column="UserId" jdbcType="VARCHAR" property="userid" />
-    <result column="Password" jdbcType="VARCHAR" property="password" />
+    <id column="userId" jdbcType="VARCHAR" property="userid" />
+    <result column="userAccount" jdbcType="VARCHAR" property="useraccount" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="userName" jdbcType="VARCHAR" property="username" />
   </resultMap>
 </mapper>
