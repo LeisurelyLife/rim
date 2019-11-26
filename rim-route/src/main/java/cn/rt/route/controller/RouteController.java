@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author ruanting
@@ -130,22 +129,7 @@ public class RouteController {
         BaseResponse response = new BaseResponse();
         log.info("开始获取好友列表");
         try {
-            String token = StringUtils.getObjStr(paramMap.get("token"));
             String userId = StringUtils.getObjStr(paramMap.get("userId"));
-
-            String pattern = Constants.REDIS_LOGIN_PREFIX + "|" + userId + "*";
-            Set<String> keys = redisTemplate.keys(pattern);
-            if (keys.size() < 1) {
-                return response;
-            }
-            String key = keys.toArray(new String[0])[0];
-            String value = redisTemplate.opsForValue().get(key);
-            String rToken = value.split("\\|")[0];
-
-            if (!token.equals(rToken)) {
-                return response;
-            }
-
             List<Map<String, Object>> friendList = userService.getFriend(userId);
             JSONObject data = new JSONObject();
             data.put("friendList", friendList);
@@ -166,20 +150,6 @@ public class RouteController {
     public BaseResponse sendMsg(@RequestBody RIMProtocol.RouteSendMsg msg) {
         BaseResponse response = new BaseResponse();
         try {
-            String pattern = Constants.REDIS_LOGIN_PREFIX + "|" + msg.getUserId() + "*";
-            Set<String> keys = redisTemplate.keys(pattern);
-            if (keys.size() < 1) {
-                response.setMsg(InterUtil.interInfo(request, "user.error.offline"));
-                return response;
-            }
-            String key = keys.toArray(new String[0])[0];
-            String value = redisTemplate.opsForValue().get(key);
-            String rToken = value.split("\\|")[0];
-
-            if (!msg.getToken().equals(rToken)) {
-                response.setMsg(InterUtil.interInfo(request, "sendmsg.error.token"));
-                return response;
-            }
             response = msgService.sendMsg(msg);
             return response;
         } catch (Exception e) {
