@@ -30,7 +30,14 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
         log.info(msg);
         try {
             Channel channel = ctx.channel();
-            JSONObject object = new JSONObject(msg);
+            JSONObject object;
+            try {
+                object = new JSONObject(msg);
+            } catch (Exception e) {
+                log.error("handler解析上送报文失败：" + msg, e);
+                return;
+            }
+
             boolean exist = SessionSocketHolder.exist((NioSocketChannel) channel);
             if (!exist) {
                 String pattern = Constants.REDIS_LOGIN_PREFIX + "|" + object.getStr("userId") + "*";
@@ -56,7 +63,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
                 redisTemplate.opsForValue().set(key, value);
             }
             log.info("用户ID" + object.getStr("userId") + "登陆成功");
-//            String result = "{}";
             JSONObject result = new JSONObject();
             result.put("code", Constants.ServerConntCode.SUCCESS.getCode());
             result.put("msg", "连接成功");

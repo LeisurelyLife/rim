@@ -65,7 +65,6 @@ public class MsgServiceImpl implements MsgService {
                 .body(param.toString())
                 .timeout(20000)
                 .execute().body();
-        System.out.println(result + "-------");
         response = JSONUtil.toBean(result, BaseResponse.class);
         return response;
     }
