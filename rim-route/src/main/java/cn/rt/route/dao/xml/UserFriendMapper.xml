@@ -1,26 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.rt.route.dao.UserFriendMapper">
-  <resultMap id="BaseResultMap" type="cn.rt.common.entity.UserFriend">
-    <!--
-      WARNING - @mbg.generated
-    -->
-    <id column="user_id" jdbcType="VARCHAR" property="userId" />
-    <id column="friend_id" jdbcType="VARCHAR" property="friendId" />
-  </resultMap>
+    <resultMap id="BaseResultMap" type="cn.rt.common.entity.UserFriend">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="user_id" jdbcType="VARCHAR" property="userId"/>
+        <id column="friend_id" jdbcType="VARCHAR" property="friendId"/>
+    </resultMap>
 
-  <select id="getFriendId" parameterType="string" resultType="string">
-    select
-        friend_id as 'friendId'
-    from
-        user_friend
-    where
-        user_id = #{userId}
-    union all select
-        user_id as 'friendId'
-    from
-        user_friend
-    where
-        friend_id = #{userId}
-  </select>
+    <select id="getFriendList" parameterType="string" resultType="map">
+        select
+            uf.friend_id as 'friendId',
+            ua.userName as 'userName'
+        from
+            user_friend uf
+        left join useraccount ua on
+            uf.friend_id = ua.userId
+        where
+            uf.user_id = #{userId}
+        union all select
+            uf.user_id as 'friendId',
+            ua.userName as 'userName'
+        from
+            user_friend uf
+        left join useraccount ua on
+            uf.friend_id = ua.userId
+        where
+            uf.friend_id = #{userId}
+    </select>
+
+    <select id="searchUserFriend" parameterType="map" resultMap="BaseResultMap">
+        select
+            *
+        from
+            user_friend
+        where
+            (
+                user_id = #{map.userId}
+                and friend_id = #{map.friendId}
+            )
+            or(
+                user_id = #{map.friendId}
+                and friend_id = #{map.userId}
+            )
+    </select>
 </mapper>

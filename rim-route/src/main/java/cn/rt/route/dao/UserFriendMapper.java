@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Param;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserFriendMapper extends Mapper<UserFriend> {
 
@@ -13,6 +14,15 @@ public interface UserFriendMapper extends Mapper<UserFriend> {
      * @param userId
      * @return
      */
-    List<String> getFriendId(@Param("userId") String userId);
+    List<Map<String, Object>> getFriendList(@Param("userId") String userId);
+
+    /**
+     * 根据用户ID和好友ID查询双方是否为好友
+     * @param map
+     * @return
+     */
+    UserFriend searchUserFriend(@Param("map") Map<String, Object> map);
+
+
 
 }

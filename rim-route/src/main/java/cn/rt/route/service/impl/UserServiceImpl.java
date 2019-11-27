@@ -4,6 +4,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONObject;
 import cn.rt.common.common.BaseResponse;
 import cn.rt.common.common.Constants;
+import cn.rt.common.entity.UserFriend;
 import cn.rt.common.entity.Useraccount;
 import cn.rt.common.util.StringUtils;
 import cn.rt.route.controller.RouteController;
@@ -102,11 +103,10 @@ public class UserServiceImpl extends BaseServiceImpl<Useraccount> implements Use
 
     @Override
     public List<Map<String, Object>> getFriend(String userId) {
-        List<String> friendIds = userFriendMapper.getFriendId(userId);
+        List<Map<String, Object>> friendList = userFriendMapper.getFriendList(userId);
         ArrayList<Map<String, Object>> result = new ArrayList<>();
-        for (String friendId : friendIds) {
-            HashMap<String, Object> friend = new HashMap<>();
-            friend.put("userId", friendId);
+        for (Map<String, Object> friend : friendList) {
+            String friendId = StringUtils.getObjStr(friend.get("friendId"));
             String pattern = Constants.REDIS_LOGIN_PREFIX + "|" + friendId + "*";
             Set<String> keys = redisTemplate.keys(pattern);
             if (keys.size() < 1) {
@@ -118,4 +118,18 @@ public class UserServiceImpl extends BaseServiceImpl<Useraccount> implements Use
         }
         return result;
     }
+
+    @Override
+    public UserFriend searchUserFriend(String userId, String friendId) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+        map.put("friendId", friendId);
+        return userFriendMapper.searchUserFriend(map);
+    }
+
+    @Override
+    public void saveUserFriend(UserFriend userFriend) {
+        userFriendMapper.insert(userFriend);
+    }
+
 }

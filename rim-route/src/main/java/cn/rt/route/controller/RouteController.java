@@ -4,6 +4,7 @@ import cn.hutool.json.JSONObject;
 import cn.rt.common.common.BaseResponse;
 import cn.rt.common.common.Constants;
 import cn.rt.common.common.RIMProtocol;
+import cn.rt.common.entity.UserFriend;
 import cn.rt.common.entity.Useraccount;
 import cn.rt.common.util.InterUtil;
 import cn.rt.common.util.StringUtils;
@@ -76,6 +77,7 @@ public class RouteController {
         log.info("新增用户成功");
         response.setState(Constants.RESP_SUCCESS);
         response.setMsg(InterUtil.interInfo(request, "common.operSucc"));
+        response.setCode(Constants.CODE_SUCCESS);
         return response;
     }
 
@@ -110,6 +112,7 @@ public class RouteController {
             BaseResponse login = userService.login(useraccount);
             if (Constants.RESP_SUCCESS.equals(login.getState())) {
                 response.setState(Constants.RESP_SUCCESS);
+                response.setCode(Constants.CODE_SUCCESS);
                 response.setData(login.getData());
                 return response;
             }
@@ -118,6 +121,7 @@ public class RouteController {
         } catch (Exception e) {
             log.error("用户登录失败", e);
             response.setState(Constants.RESP_FAIL);
+            response.setCode(Constants.CODE_FAIL);
             response.setMsg(InterUtil.interInfo(request, "common.operFail"));
             return response;
         }
@@ -135,11 +139,86 @@ public class RouteController {
             data.put("friendList", friendList);
             response.setData(data);
             response.setState(Constants.RESP_SUCCESS);
+            response.setCode(Constants.CODE_SUCCESS);
             log.info("获取好友列表成功");
             return response;
         } catch (Exception e) {
             log.error("用户获取好友列表失败", e);
             response.setState(Constants.RESP_FAIL);
+            response.setCode(Constants.CODE_FAIL);
+            response.setMsg(InterUtil.interInfo(request, "common.operFail"));
+            return response;
+        }
+    }
+
+    @RequestMapping(value = "/searchNum", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResponse searchNum(@RequestBody Map<String, Object> paramMap) {
+        BaseResponse response = new BaseResponse();
+        log.info("开始查询账号");
+        try {
+            String type = StringUtils.getObjStr(paramMap.get("type"));
+            String number = StringUtils.getObjStr(paramMap.get("number"));
+            if ("01".equals(type)) {
+                Useraccount useraccount = new Useraccount();
+                useraccount.setUseraccount(number);
+                useraccount = userService.selectOne(useraccount);
+                response.setState(Constants.RESP_SUCCESS);
+                response.setCode(Constants.CODE_SUCCESS);
+                if (useraccount != null) {
+                    JSONObject data = new JSONObject();
+                    data.put("type", type);
+                    data.put("targetNum", useraccount.getUseraccount());
+                    data.put("targetName", useraccount.getUsername());
+                    response.setData(data);
+                }
+                return response;
+            } else if ("02".equals(type)) {
+                return response;
+            }
+            log.info("查询账号成功");
+            return response;
+        } catch (Exception e) {
+            log.error("查询账号失败", e);
+            response.setState(Constants.RESP_FAIL);
+            response.setCode(Constants.CODE_FAIL);
+            response.setMsg(InterUtil.interInfo(request, "common.operFail"));
+            return response;
+        }
+    }
+
+    @RequestMapping(value = "/addFriend", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResponse addFriend(@RequestBody Map<String, Object> paramMap) {
+        BaseResponse response = new BaseResponse();
+        log.info("开始添加好友");
+        try {
+            String userId = StringUtils.getObjStr(paramMap.get("userId"));
+            String targetNum = StringUtils.getObjStr(paramMap.get("targetNum"));
+
+            Useraccount friend = new Useraccount();
+            friend.setUseraccount(targetNum);
+            friend = userService.selectOne(friend);
+            UserFriend userFriend = userService.searchUserFriend(userId, friend.getUserid());
+            if (userFriend != null) {
+                response.setState(Constants.RESP_FAIL);
+                response.setCode(Constants.CODE_FAIL);
+                response.setMsg("好友已存在");
+                return response;
+            }
+            userFriend = new UserFriend();
+            userFriend.setUserId(userId);
+            userFriend.setFriendId(friend.getUserid());
+            userService.saveUserFriend(userFriend);
+
+            response.setCode(Constants.CODE_SUCCESS);
+            response.setState(Constants.RESP_SUCCESS);
+            log.info("添加好友成功");
+            return response;
+        } catch (Exception e) {
+            log.error("添加好友失败", e);
+            response.setState(Constants.RESP_FAIL);
+            response.setCode(Constants.CODE_FAIL);
             response.setMsg(InterUtil.interInfo(request, "common.operFail"));
             return response;
         }
@@ -151,11 +230,13 @@ public class RouteController {
         BaseResponse response = new BaseResponse();
         try {
             response = msgService.sendMsg(msg);
+            response.setCode(Constants.CODE_SUCCESS);
             return response;
         } catch (Exception e) {
             log.error("发送消息失败", e);
             response.setState(Constants.RESP_FAIL);
             response.setMsg(InterUtil.interInfo(request, "common.operFail"));
+            response.setCode(Constants.CODE_FAIL);
             return response;
         }
     }

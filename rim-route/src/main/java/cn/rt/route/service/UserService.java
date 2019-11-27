@@ -1,6 +1,7 @@
 package cn.rt.route.service;
 
 import cn.rt.common.common.BaseResponse;
+import cn.rt.common.entity.UserFriend;
 import cn.rt.common.entity.Useraccount;
 
 import java.util.List;
@@ -35,6 +36,25 @@ public interface UserService extends BaseService<Useraccount> {
 
     String getRedisKey();
 
+    /**
+     * 获取好友列表
+     * @param userId
+     * @return
+     */
     List<Map<String, Object>> getFriend(String userId);
+
+    /**
+     * 查询双方是否为好友
+     * @param userId
+     * @param friendId
+     * @return
+     */
+    UserFriend searchUserFriend(String userId, String friendId);
+
+    /**
+     * 保存好友列表
+     * @param userFriend
+     */
+    void saveUserFriend(UserFriend userFriend);
 
 }
