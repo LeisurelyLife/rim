@@ -14,7 +14,6 @@ import cn.rt.route.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,9 +36,6 @@ public class RouteController {
 
     @Autowired
     private HttpServletRequest request;
-
-    @Autowired
-    private RedisTemplate<String, String> redisTemplate;
 
     @Autowired
     private UserService userService;

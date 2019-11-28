@@ -49,12 +49,14 @@ public class IndexController {
             String auth = request.getHeader(Constants.HEAN_AUTH);
             String rAuth = redisTemplate.opsForValue().get(Constants.HEAN_AUTH);
             if (!auth.equals(rAuth)) {
+                response.setCode(Constants.CODE_FAIL);
                 return response;
             }
             BaseResponse sendResp = msgService.sendMsg(ssm);
             return sendResp;
         } catch (Exception e) {
             log.error("发送消息失败", e);
+            response.setCode(Constants.CODE_FAIL);
             return response;
         }
     }

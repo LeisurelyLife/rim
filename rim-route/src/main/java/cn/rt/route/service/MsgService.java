@@ -9,6 +9,11 @@ import cn.rt.common.common.RIMProtocol;
  */
 public interface MsgService {
 
+    /**
+     * 发送消息
+     * @param msg
+     * @return
+     */
     BaseResponse sendMsg(RIMProtocol.RouteSendMsg msg);
 
 }

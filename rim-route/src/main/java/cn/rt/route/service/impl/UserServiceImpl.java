@@ -7,7 +7,6 @@ import cn.rt.common.common.Constants;
 import cn.rt.common.entity.UserFriend;
 import cn.rt.common.entity.Useraccount;
 import cn.rt.common.util.StringUtils;
-import cn.rt.route.controller.RouteController;
 import cn.rt.route.dao.UserFriendMapper;
 import cn.rt.route.dao.UseraccountMapper;
 import cn.rt.route.service.UserService;
@@ -28,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class UserServiceImpl extends BaseServiceImpl<Useraccount> implements UserService {
 
-    private static final Logger log = LoggerFactory.getLogger(RouteController.class);
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
@@ -94,11 +93,6 @@ public class UserServiceImpl extends BaseServiceImpl<Useraccount> implements Use
         data.put("token", token);
         baseResponse.setData(data);
         return baseResponse;
-    }
-
-    @Override
-    public String getRedisKey() {
-        return null;
     }
 
     @Override

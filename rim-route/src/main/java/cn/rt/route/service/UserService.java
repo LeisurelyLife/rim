@@ -34,8 +34,6 @@ public interface UserService extends BaseService<Useraccount> {
      */
     BaseResponse login(Useraccount useraccount);
 
-    String getRedisKey();
-
     /**
      * 获取好友列表
      * @param userId

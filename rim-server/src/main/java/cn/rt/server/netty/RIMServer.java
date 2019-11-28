@@ -44,11 +44,10 @@ public class RIMServer {
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 
-
         // 绑定端口，开始接收进来的连接
         ChannelFuture f = b.bind(port).sync();
         if (f.isSuccess()) {
-            System.out.println("SimpleChatServer 启动了");
+            log.info("SimpleChatServer 启动了");
         }
     }
 
@@ -63,6 +62,7 @@ public class RIMServer {
         NioSocketChannel userChannel = SessionSocketHolder.getUserChannel(ssm.getTargetUserId());
         if (userChannel == null) {
             log.info("channel is null");
+            response.setCode(Constants.CODE_FAIL);
             return response;
         }
         JSONObject msg = new JSONObject();
@@ -73,11 +73,12 @@ public class RIMServer {
         msg.put("msg", ssm.getMsg());
         userChannel.writeAndFlush(msg.toString());
         if (true) {
-            log.info("future is success");
             response.setState(Constants.RESP_SUCCESS);
+            response.setCode(Constants.CODE_SUCCESS);
             return response;
         } else {
             log.info("future is fail");
+            response.setCode(Constants.CODE_FAIL);
             return response;
         }
     }
