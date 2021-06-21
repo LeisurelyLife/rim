@@ -20,6 +20,7 @@
         <module>rim-route</module>
         <module>rim-server</module>
         <module>rim-common</module>
+        <module>rim-client</module>
     </modules>
 
     <properties>
