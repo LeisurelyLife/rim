@@ -4,11 +4,11 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONObject;
 import cn.rt.common.common.BaseResponse;
 import cn.rt.common.common.Constants;
+import cn.rt.common.entity.UserAccount;
 import cn.rt.common.entity.UserFriend;
-import cn.rt.common.entity.Useraccount;
 import cn.rt.common.util.StringUtils;
+import cn.rt.route.dao.UserAccountMapper;
 import cn.rt.route.dao.UserFriendMapper;
-import cn.rt.route.dao.UseraccountMapper;
 import cn.rt.route.service.UserService;
 import cn.rt.route.util.ZKModule;
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2019/10/11
  */
 @Service
-public class UserServiceImpl extends BaseServiceImpl<Useraccount> implements UserService {
+public class UserServiceImpl extends BaseServiceImpl<UserAccount> implements UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -36,23 +36,23 @@ public class UserServiceImpl extends BaseServiceImpl<Useraccount> implements Use
     private ZKModule zkModule;
 
     @Autowired
-    private UseraccountMapper useraccountMapper;
+    private UserAccountMapper userAccountMapper;
 
     @Autowired
     private UserFriendMapper userFriendMapper;
 
     @Override
-    public BaseResponse register(Useraccount useraccount) {
-        useraccountMapper.insert(useraccount);
+    public BaseResponse register(UserAccount useraccount) {
+        userAccountMapper.insert(useraccount);
         BaseResponse response = new BaseResponse();
         response.setState(Constants.RESP_SUCCESS);
         return response;
     }
 
     @Override
-    public BaseResponse isLogin(Useraccount useraccount) {
+    public BaseResponse isLogin(UserAccount useraccount) {
         BaseResponse baseResponse = new BaseResponse();
-        String pattern = Constants.REDIS_LOGIN_PREFIX + "|" + useraccount.getUserid() + "*";
+        String pattern = Constants.REDIS_LOGIN_PREFIX + "|" + useraccount.getUserId() + "*";
         Set<String> keys = redisTemplate.keys(pattern);
         if (keys.size() < 1) {
             baseResponse.setMsg("未登陆");
@@ -66,14 +66,14 @@ public class UserServiceImpl extends BaseServiceImpl<Useraccount> implements Use
         JSONObject data = new JSONObject();
         data.put("socketServer", kSplit[0]);
         data.put("socketPort", kSplit[2]);
-        data.put("userId", useraccount.getUserid());
+        data.put("userId", useraccount.getUserId());
         data.put("token", vSplit[0]);
         baseResponse.setData(data);
         return baseResponse;
     }
 
     @Override
-    public BaseResponse login(Useraccount useraccount) {
+    public BaseResponse login(UserAccount useraccount) {
         BaseResponse baseResponse = new BaseResponse();
         String randomServer = zkModule.getRandomServer();
         if (StringUtils.isEmpty(randomServer)) {
@@ -81,7 +81,7 @@ public class UserServiceImpl extends BaseServiceImpl<Useraccount> implements Use
             return baseResponse;
         }
         String[] split = randomServer.split(":");
-        String redisKey = Constants.REDIS_LOGIN_PREFIX + "|" + useraccount.getUserid() + "|" + split[0] + ":" + split[1] + ":" + split[2];
+        String redisKey = Constants.REDIS_LOGIN_PREFIX + "|" + useraccount.getUserId() + "|" + split[0] + ":" + split[1] + ":" + split[2];
         String token = IdUtil.simpleUUID();
         String redisV = token;
         redisTemplate.opsForValue().set(redisKey, redisV, 60, TimeUnit.SECONDS);
@@ -89,7 +89,7 @@ public class UserServiceImpl extends BaseServiceImpl<Useraccount> implements Use
         JSONObject data = new JSONObject();
         data.put("socketServer", split[0]);
         data.put("socketPort", split[2]);
-        data.put("userId", useraccount.getUserid());
+        data.put("userId", useraccount.getUserId());
         data.put("token", token);
         baseResponse.setData(data);
         return baseResponse;

@@ -1,9 +1,12 @@
 package cn.rt.common.common;
 
+import lombok.ToString;
+
 /**
  * @author ruanting
  * @date 2019/10/11
  */
+@ToString
 public class BaseResponse {
 
     /**

@@ -40,9 +40,9 @@ public class RIMServer {
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
-                .childHandler(new ServerInitializer())
                 .option(ChannelOption.SO_BACKLOG, 128)
-                .childOption(ChannelOption.SO_KEEPALIVE, true);
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .childHandler(new ServerInitializer());
 
         // 绑定端口，开始接收进来的连接
         ChannelFuture f = b.bind(port).sync();

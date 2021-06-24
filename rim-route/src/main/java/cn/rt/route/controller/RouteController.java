@@ -5,7 +5,7 @@ import cn.rt.common.common.BaseResponse;
 import cn.rt.common.common.Constants;
 import cn.rt.common.common.RIMProtocol;
 import cn.rt.common.entity.UserFriend;
-import cn.rt.common.entity.Useraccount;
+import cn.rt.common.entity.UserAccount;
 import cn.rt.common.util.InterUtil;
 import cn.rt.common.util.StringUtils;
 import cn.rt.common.util.UuidUtils;
@@ -51,18 +51,18 @@ public class RouteController {
         try {
             String account = StringUtils.getObjStr(paramMap.get("userAccount"));
             String password = StringUtils.getObjStr(paramMap.get("password"));
-            Useraccount useraccount = new Useraccount();
-            useraccount.setUseraccount(account);
+            UserAccount useraccount = new UserAccount();
+            useraccount.setUserAccount(account);
             useraccount = userService.selectOne(useraccount);
             if (useraccount != null) {
                 response.setState(Constants.RESP_FAIL);
                 response.setMsg(InterUtil.interInfo(request, "user.error.exist"));
                 return response;
             }
-            useraccount = new Useraccount();
-            useraccount.setUseraccount(account);
-            useraccount.setPassword(password);
-            useraccount.setUserid(UuidUtils.getRandomUuidWithoutSeparator());
+            useraccount = new UserAccount();
+            useraccount.setUserAccount(account);
+            useraccount.setUserPassword(password);
+            useraccount.setUserId(UuidUtils.getRandomUuidWithoutSeparator());
             userService.register(useraccount);
         } catch (Exception e) {
             log.error("新增用户失败", e);
@@ -79,33 +79,31 @@ public class RouteController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
-    public BaseResponse login(@RequestBody Map<String, Object> paramMap) {
+    public BaseResponse login(@RequestBody UserAccount userAccount) {
         BaseResponse response = new BaseResponse();
         log.info("用户开始登录");
         try {
-            String account = StringUtils.getObjStr(paramMap.get("userAccount"));
-            String password = StringUtils.getObjStr(paramMap.get("password"));
-            Useraccount useraccount = new Useraccount();
-            useraccount.setUseraccount(account);
-            useraccount = userService.selectOne(useraccount);
-            if (useraccount == null) {
+            UserAccount param = new UserAccount();
+            param.setUserAccount(userAccount.getUserAccount());
+            param = userService.selectOne(param);
+            if (param == null) {
                 response.setState(Constants.RESP_FAIL);
                 response.setMsg(InterUtil.interInfo(request, "user.error.notexist"));
                 return response;
             }
 
-            if (!useraccount.getPassword().equals(password)) {
+            if (!param.getUserPassword().equals(userAccount.getUserPassword())) {
                 response.setState(Constants.RESP_FAIL);
                 response.setMsg(InterUtil.interInfo(request, "user.error.password"));
                 return response;
             }
 
-            BaseResponse isLogin = userService.isLogin(useraccount);
+            BaseResponse isLogin = userService.isLogin(param);
             if (Constants.RESP_SUCCESS.equals(isLogin.getState())) {
                 return isLogin;
             }
 
-            BaseResponse login = userService.login(useraccount);
+            BaseResponse login = userService.login(param);
             if (Constants.RESP_SUCCESS.equals(login.getState())) {
                 response.setState(Constants.RESP_SUCCESS);
                 response.setCode(Constants.CODE_SUCCESS);
@@ -156,16 +154,16 @@ public class RouteController {
             String type = StringUtils.getObjStr(paramMap.get("type"));
             String number = StringUtils.getObjStr(paramMap.get("number"));
             if ("01".equals(type)) {
-                Useraccount useraccount = new Useraccount();
-                useraccount.setUseraccount(number);
+                UserAccount useraccount = new UserAccount();
+                useraccount.setUserAccount(number);
                 useraccount = userService.selectOne(useraccount);
                 response.setState(Constants.RESP_SUCCESS);
                 response.setCode(Constants.CODE_SUCCESS);
                 if (useraccount != null) {
                     JSONObject data = new JSONObject();
                     data.put("type", type);
-                    data.put("targetNum", useraccount.getUseraccount());
-                    data.put("targetName", useraccount.getUsername());
+                    data.put("targetNum", useraccount.getUserAccount());
+                    data.put("targetName", useraccount.getUserName());
                     response.setData(data);
                 }
                 return response;
@@ -192,10 +190,10 @@ public class RouteController {
             String userId = StringUtils.getObjStr(paramMap.get("userId"));
             String targetNum = StringUtils.getObjStr(paramMap.get("targetNum"));
 
-            Useraccount friend = new Useraccount();
-            friend.setUseraccount(targetNum);
+            UserAccount friend = new UserAccount();
+            friend.setUserAccount(targetNum);
             friend = userService.selectOne(friend);
-            UserFriend userFriend = userService.searchUserFriend(userId, friend.getUserid());
+            UserFriend userFriend = userService.searchUserFriend(userId, friend.getUserId());
             if (userFriend != null) {
                 response.setState(Constants.RESP_FAIL);
                 response.setCode(Constants.CODE_FAIL);
@@ -204,7 +202,7 @@ public class RouteController {
             }
             userFriend = new UserFriend();
             userFriend.setUserId(userId);
-            userFriend.setFriendId(friend.getUserid());
+            userFriend.setFriendId(friend.getUserId());
             userService.saveUserFriend(userFriend);
 
             response.setCode(Constants.CODE_SUCCESS);
