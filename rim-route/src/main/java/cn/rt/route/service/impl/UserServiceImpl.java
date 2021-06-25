@@ -91,6 +91,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserAccount> implements Use
         data.put("socketPort", split[2]);
         data.put("userId", useraccount.getUserId());
         data.put("token", token);
+        data.put("userName", useraccount.getUserName());
         baseResponse.setData(data);
         return baseResponse;
     }

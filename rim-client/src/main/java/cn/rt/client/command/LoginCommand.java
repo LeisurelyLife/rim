@@ -101,7 +101,11 @@ public class LoginCommand implements Command {
         // 4.建立连接
         JSONObject data = JSON.parseObject(JSON.toJSONString(baseResponse.getData()));
         data.put("socketServer", "localhost");
-        return connect(bootstrap, data.getString("socketServer"), data.getIntValue("socketPort"), MAX_RETRY);
+        boolean connect = connect(bootstrap, data.getString("socketServer"), data.getIntValue("socketPort"), MAX_RETRY);
+        if (connect) {
+            RimClient.userName = data.getString("userName");
+        }
+        return connect;
     }
 
     private static boolean connect(Bootstrap bootstrap, String host, int port, int retry) {

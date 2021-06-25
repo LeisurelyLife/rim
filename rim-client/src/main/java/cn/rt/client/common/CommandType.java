@@ -8,7 +8,8 @@ public enum CommandType {
     /**
      * 登录指令
      */
-    login("login", "登录");
+    login("login", "登录"),
+    help("help", "帮助");
     private String value;
     private String description;
 
@@ -24,5 +25,4 @@ public enum CommandType {
     public String getDescription() {
         return description;
     }
-
 }

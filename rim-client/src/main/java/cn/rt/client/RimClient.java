@@ -18,6 +18,8 @@ public class RimClient {
 
     private static Map<String, Command> commandMap;
 
+    public static String userName = "";
+
     static {
         commandMap = new HashMap<>();
         commandMap.put(CommandType.login.getValue(), new LoginCommand());
@@ -30,8 +32,9 @@ public class RimClient {
     private static void startConsoleThread() {
         Scanner sc = new Scanner(System.in);
         boolean flag = true;
-
+        System.out.println("欢迎！");
         while (flag) {
+            System.out.print(userName + ":");
             String command = sc.nextLine();
             doCommand(command);
         }
@@ -41,11 +44,21 @@ public class RimClient {
         if (StringUtils.isEmpty(command)) {
             return;
         }
+        if (CommandType.help.getValue().equals(command)) {
+            printCommands();
+            return;
+        }
         Command c = commandMap.get(command);
         if (c == null) {
             System.out.println("不存在此命令");
             return;
         }
         c.doCommand();
+    }
+
+    private static void printCommands() {
+        for (CommandType value : CommandType.values()) {
+            System.out.println(value.getValue() + ":" + value.getDescription());
+        }
     }
 }
