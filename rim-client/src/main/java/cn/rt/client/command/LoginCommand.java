@@ -10,6 +10,7 @@ import cn.rt.common.common.BaseResponse;
 import cn.rt.common.common.Constants;
 import cn.rt.common.entity.UserAccount;
 import cn.rt.common.netty.handler.PacketDecoder;
+import cn.rt.common.netty.handler.PacketEncoder;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.netty.bootstrap.Bootstrap;
@@ -102,7 +103,7 @@ public class LoginCommand implements Command {
                         ch.pipeline().addLast(new PacketDecoder());
                         ch.pipeline().addLast(new LoginRequestHandler(data.getString("userId"), data.getString("token")));
                         ch.pipeline().addLast(new LoginReceiveHandler());
-//                        ch.pipeline().addLast(new PacketEncoder());
+                        ch.pipeline().addLast(new PacketEncoder());
                     }
                 });
         // 4.建立连接

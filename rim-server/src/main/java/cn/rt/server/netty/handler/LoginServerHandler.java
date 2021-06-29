@@ -2,14 +2,10 @@ package cn.rt.server.netty.handler;
 
 import cn.rt.common.netty.message.ResponseMessage;
 import cn.rt.common.netty.message.login.LoginRequestMessage;
-import cn.rt.common.netty.translate.MessageTranslator;
-import cn.rt.common.netty.translate.SerializerAlgorithm;
 import cn.rt.server.service.LoginService;
 import cn.rt.server.service.impl.LoginServiceImpl;
 import cn.rt.server.util.SessionSocketHolder;
 import cn.rt.server.util.SpringBeanFactory;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -33,9 +29,6 @@ public class LoginServerHandler extends SimpleChannelInboundHandler<LoginRequest
         if (ResponseMessage.RESP_SUCCESS.equals(response.getRespResult())) {
             SessionSocketHolder.setUserChannel(message.getUserId(), ctx.channel());
         }
-        // 1. 创建 ByteBuf 对象
-        ByteBuf out = ByteBufAllocator.DEFAULT.ioBuffer();
-        MessageTranslator.encode(response, SerializerAlgorithm.JSON, out);
-        ctx.channel().writeAndFlush(out);
+        ctx.channel().writeAndFlush(response);
     }
 }

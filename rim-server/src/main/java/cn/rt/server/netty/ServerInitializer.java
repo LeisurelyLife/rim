@@ -1,6 +1,7 @@
 package cn.rt.server.netty;
 
 import cn.rt.common.netty.handler.PacketDecoder;
+import cn.rt.common.netty.handler.PacketEncoder;
 import cn.rt.server.netty.handler.LoginServerHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -20,7 +21,7 @@ public class ServerInitializer extends ChannelInitializer<NioSocketChannel> {
 //        pipeline.addLast("framer", new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
         pipeline.addLast(new PacketDecoder());
         pipeline.addLast(new LoginServerHandler());
-//        pipeline.addLast(new PacketEncoder());
+        pipeline.addLast(new PacketEncoder());
 //        pipeline.addLast("handler", new ServerHandler());
     }
 

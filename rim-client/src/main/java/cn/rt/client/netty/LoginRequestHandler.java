@@ -1,10 +1,6 @@
 package cn.rt.client.netty;
 
 import cn.rt.common.netty.message.login.LoginRequestMessage;
-import cn.rt.common.netty.translate.MessageTranslator;
-import cn.rt.common.netty.translate.SerializerAlgorithm;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -28,9 +24,7 @@ public class LoginRequestHandler extends ChannelInboundHandlerAdapter {
         LoginRequestMessage message = new LoginRequestMessage();
         message.setUserId(userId);
         message.setToken(token);
-        ByteBuf out = ByteBufAllocator.DEFAULT.ioBuffer();
-        MessageTranslator.encode(message, SerializerAlgorithm.JSON, out);
-        ctx.channel().writeAndFlush(out);
+        ctx.channel().writeAndFlush(message);
 
         ctx.pipeline().remove(this);
     }
