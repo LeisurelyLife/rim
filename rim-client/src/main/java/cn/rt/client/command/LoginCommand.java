@@ -18,24 +18,38 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author ruanting
  * @date 2021/6/22
  */
+@Slf4j
 public class LoginCommand implements Command {
     /**
      * 登录接口路径
      */
     private static final String LOGIN_PATH = "/login";
 
+    /**
+     * 连接server重试最大次数
+     */
     private static final int MAX_RETRY = 5;
+
+    /**
+     * 完成连接server尝试
+     */
+    private static boolean finishTryConnect = false;
+
+    /**
+     * 是否连接server成功
+     */
+    private static boolean connectSuccess = false;
 
     boolean flag = true;
 
@@ -45,6 +59,10 @@ public class LoginCommand implements Command {
     @Override
     public void doCommand() {
         Scanner sc = new Scanner(System.in);
+        if (RimClient.isLogin) {
+            System.out.println("用户已登录！");
+            return;
+        }
 
         while (flag) {
             if (StringUtils.isEmpty(userAccount)) {
@@ -62,6 +80,7 @@ public class LoginCommand implements Command {
                 flag = false;
             } else {
                 System.out.println("登录失败，请重新登录");
+                RimClient.cacheName = "";
                 userAccount = null;
                 password = null;
             }
@@ -82,12 +101,12 @@ public class LoginCommand implements Command {
         if (Constants.RESP_FAIL.equals(baseResponse.getState())) {
             return false;
         }
-        connectServer(baseResponse);
-        return true;
+        JSONObject data = JSON.parseObject(JSON.toJSONString(baseResponse.getData()));
+        RimClient.cacheName = data.getString("userName");
+        return connectServer(data);
     }
 
-    private boolean connectServer(BaseResponse baseResponse) {
-        JSONObject data = JSON.parseObject(JSON.toJSONString(baseResponse.getData()));
+    private boolean connectServer(JSONObject data) {
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
 
         Bootstrap bootstrap = new Bootstrap();
@@ -106,24 +125,28 @@ public class LoginCommand implements Command {
                         ch.pipeline().addLast(new PacketEncoder());
                     }
                 });
-        // 4.建立连接
+        // 4.建立连接 todo
         data.put("socketServer", "localhost");
-        boolean connect = connect(bootstrap, data.getString("socketServer"), data.getIntValue("socketPort"), MAX_RETRY);
-        if (connect) {
-            RimClient.cachName = data.getString("userName");
+        connect(bootstrap, data.getString("socketServer"), data.getIntValue("socketPort"), MAX_RETRY);
+        while (!finishTryConnect) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                log.error("线程睡眠出错：", e);
+            }
         }
-        return connect;
+        return connectSuccess;
     }
 
-    private static boolean connect(Bootstrap bootstrap, String host, int port, int retry) {
-        AtomicBoolean connect = new AtomicBoolean(false);
+    private static void connect(Bootstrap bootstrap, String host, int port, int retry) {
         bootstrap.connect(host, port).addListener(future -> {
             if (future.isSuccess()) {
+                connectSuccess = true;
+                finishTryConnect = true;
                 System.out.println("连接服务器成功!");
-                connect.set(true);
             } else if (retry == 0) {
                 System.err.println("重试次数已用完，放弃连接！");
-                connect.set(false);
+                finishTryConnect = true;
             } else {
                 // 第几次重连
                 int order = (MAX_RETRY - retry) + 1;
@@ -134,6 +157,5 @@ public class LoginCommand implements Command {
                         .SECONDS);
             }
         });
-        return connect.get();
     }
 }

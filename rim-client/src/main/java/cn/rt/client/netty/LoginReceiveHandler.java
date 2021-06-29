@@ -14,11 +14,11 @@ public class LoginReceiveHandler extends SimpleChannelInboundHandler<LoginRespon
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, LoginResponseMessage msg) throws Exception {
         if (ResponseMessage.RESP_SUCCESS.equals(msg.getRespResult())) {
-            RimClient.userName = RimClient.cachName;
+            RimClient.userName = RimClient.cacheName;
             RimClient.isLogin = true;
             System.out.println(RimClient.userName + "登录成功！");
         } else {
-            System.out.println(RimClient.cachName + "用户登录失败，请重试！");
+            System.out.println(RimClient.cacheName + "用户登录失败，请重试！");
         }
     }
 }
