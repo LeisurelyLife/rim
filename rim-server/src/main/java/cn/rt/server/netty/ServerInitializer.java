@@ -1,12 +1,10 @@
 package cn.rt.server.netty;
 
+import cn.rt.common.netty.handler.PacketDecoder;
+import cn.rt.server.netty.handler.LoginServerHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import io.netty.handler.codec.Delimiters;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
 
 /**
  * @author ruanting
@@ -19,11 +17,11 @@ public class ServerInitializer extends ChannelInitializer<NioSocketChannel> {
         System.out.println("连接上了");
         ChannelPipeline pipeline = channel.pipeline();
 
-        pipeline.addLast("framer", new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
-        pipeline.addLast("decoder", new StringDecoder());
-        pipeline.addLast("encoder", new StringEncoder());
-        pipeline.addLast("handler", new ServerHandler());
-
+//        pipeline.addLast("framer", new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
+        pipeline.addLast(new PacketDecoder());
+        pipeline.addLast(new LoginServerHandler());
+//        pipeline.addLast(new PacketEncoder());
+//        pipeline.addLast("handler", new ServerHandler());
     }
 
 }

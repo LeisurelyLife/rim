@@ -22,7 +22,4 @@ public interface UserFriendMapper extends Mapper<UserFriend> {
      * @return
      */
     UserFriend searchUserFriend(@Param("map") Map<String, Object> map);
-
-
-
 }

@@ -20,6 +20,10 @@ public class RimClient {
 
     public static String userName = "";
 
+    public static String cachName = "";
+
+    public static boolean isLogin = false;
+
     static {
         commandMap = new HashMap<>();
         commandMap.put(CommandType.login.getValue(), new LoginCommand());

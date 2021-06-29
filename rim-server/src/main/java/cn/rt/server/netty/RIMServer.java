@@ -6,12 +6,12 @@ import cn.rt.common.common.Constants;
 import cn.rt.common.common.RIMProtocol;
 import cn.rt.server.util.SessionSocketHolder;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,7 +59,7 @@ public class RIMServer {
 
     public BaseResponse sendMsg(RIMProtocol.ServerSendMsg ssm) {
         BaseResponse response = new BaseResponse();
-        NioSocketChannel userChannel = SessionSocketHolder.getUserChannel(ssm.getTargetUserId());
+        Channel userChannel = SessionSocketHolder.getUserChannel(ssm.getTargetUserId());
         if (userChannel == null) {
             log.info("channel is null");
             response.setCode(Constants.CODE_FAIL);

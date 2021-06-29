@@ -83,8 +83,8 @@ public class UserServiceImpl extends BaseServiceImpl<UserAccount> implements Use
         String[] split = randomServer.split(":");
         String redisKey = Constants.REDIS_LOGIN_PREFIX + "|" + useraccount.getUserId() + "|" + split[0] + ":" + split[1] + ":" + split[2];
         String token = IdUtil.simpleUUID();
-        String redisV = token;
-        redisTemplate.opsForValue().set(redisKey, redisV, 60, TimeUnit.SECONDS);
+        String redisValue = token;
+        redisTemplate.opsForValue().set(redisKey, redisValue, 60, TimeUnit.SECONDS);
         baseResponse.setState(Constants.RESP_SUCCESS);
         JSONObject data = new JSONObject();
         data.put("socketServer", split[0]);

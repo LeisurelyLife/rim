@@ -4,9 +4,12 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.rt.client.RimClient;
+import cn.rt.client.netty.LoginReceiveHandler;
+import cn.rt.client.netty.LoginRequestHandler;
 import cn.rt.common.common.BaseResponse;
 import cn.rt.common.common.Constants;
 import cn.rt.common.entity.UserAccount;
+import cn.rt.common.netty.handler.PacketDecoder;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.netty.bootstrap.Bootstrap;
@@ -55,7 +58,6 @@ public class LoginCommand implements Command {
             }
 
             if (login()) {
-                System.out.println("登录成功");
                 flag = false;
             } else {
                 System.out.println("登录失败，请重新登录");
@@ -84,6 +86,7 @@ public class LoginCommand implements Command {
     }
 
     private boolean connectServer(BaseResponse baseResponse) {
+        JSONObject data = JSON.parseObject(JSON.toJSONString(baseResponse.getData()));
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
 
         Bootstrap bootstrap = new Bootstrap();
@@ -96,14 +99,17 @@ public class LoginCommand implements Command {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch) {
+                        ch.pipeline().addLast(new PacketDecoder());
+                        ch.pipeline().addLast(new LoginRequestHandler(data.getString("userId"), data.getString("token")));
+                        ch.pipeline().addLast(new LoginReceiveHandler());
+//                        ch.pipeline().addLast(new PacketEncoder());
                     }
                 });
         // 4.建立连接
-        JSONObject data = JSON.parseObject(JSON.toJSONString(baseResponse.getData()));
         data.put("socketServer", "localhost");
         boolean connect = connect(bootstrap, data.getString("socketServer"), data.getIntValue("socketPort"), MAX_RETRY);
         if (connect) {
-            RimClient.userName = data.getString("userName");
+            RimClient.cachName = data.getString("userName");
         }
         return connect;
     }
@@ -112,7 +118,7 @@ public class LoginCommand implements Command {
         AtomicBoolean connect = new AtomicBoolean(false);
         bootstrap.connect(host, port).addListener(future -> {
             if (future.isSuccess()) {
-                System.out.println("连接成功!");
+                System.out.println("连接服务器成功!");
                 connect.set(true);
             } else if (retry == 0) {
                 System.err.println("重试次数已用完，放弃连接！");
